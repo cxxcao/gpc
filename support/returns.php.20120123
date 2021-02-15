@@ -1,0 +1,911 @@
+<?php
+session_start();
+   error_reporting(E_ALL);
+   ini_set("display_errors", 1);
+$home = dirname(__FILE__) . "/../";
+$lib = $home ."/lib/";
+
+require_once($home . '/globals.php');
+require_once($lib . 'functions.php');
+require_once($lib . 'loginfunctions.php');
+require_once($lib . 'htmlGenerator.php');
+require_once('warrantyclass.php');
+
+$action = _checkIsSet("action");
+
+if(!user_isloggedin())
+{
+   header("Location: " . _CUR_HOST. _DIR);
+}
+
+
+$action = _checkIsSet("action");
+if($_SESSION[_WARRANTY_SESSION])
+{
+   $warranty = unserialize($_SESSION[_WARRANTY_SESSION]);
+}
+else
+   $warranty = new warranty();
+
+if(!$warranty)
+{
+   $warranty = new warranty();
+}
+
+if($action == "new")
+{
+   $warranty = new warranty();
+   //check for order_id;
+   $order_id = _checkIsSet(_ORDER_ID);
+   if($order_id)
+   {
+      $warranty->order_id = $order_id;
+      $warranty->name = $warranty->getFieldFromOrder($order_id, "name");
+//      $warranty->email = $warranty->getFieldFromOrder($order_id, _EMAIL);
+   }
+}
+else if($action == "SUBMIT")
+{
+   if($warranty->saveWarranty())
+      header("Location: " . _CUR_HOST. _DIR ."support/listreturns.php");
+//      echo "<meta http-equiv=\"refresh\" content=\"0; url="._DIR."support/listreturns.php\">";
+}
+else if($action == _UPDATE || $warranty->action_type == _UPDATE)
+{
+   $warranty_id = _checkIsSet("warranty_id");
+   if($warranty_id)
+      $warranty->LoadWarranty($warranty_id);
+//         echo "<meta http-equiv=\"refresh\" content=\"0; url="._DIR."support/listwarranty.php\">";
+
+}
+
+
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+   <title>Designs To You - DTYLink Online Ordering</title>
+   <?php include('../_inc/js_css.php');?>
+   <link rel="stylesheet" type="text/css" href="<?php  echo _CUR_HOST . _DIR ; ?>_css/jquerytable.css" media="screen" />
+
+   <script type="text/javascript">
+         function populateSizes(prodEleID, sizeEleID)
+         {
+            var pid = $(prodEleID).val();
+            param = 'prod_id=' + pid;
+
+            $.ajax({ // sending an ajax request to addtocart.php
+               type: "POST",
+               url: "ajaxGetSizes.php",
+               data: param,   // the product image as a parameter
+               dataType: 'json', // expecting json
+               success: function(msg){
+                  var options = '';
+                  $(sizeEleID).empty();
+                  for(j = 0; j < msg.length; j++)
+                  {
+                     item1 = msg[j];
+                     disp1 = msg[j];
+                     //options += '<option value="' + item + '">' + disp + '</option>';
+
+                     $("<option>").attr("value", item1).text(disp1).appendTo(sizeEleID);
+
+                  }
+               },
+               failure: function(msg){
+                  alert('Error!');
+               }
+            });
+         }
+
+      $(document).ready(function() {
+
+         if(jQuery("#order_id").val() != "")
+         {
+            if(jQuery('#numRowsAdded').val() == 0)
+               addrow();
+         }
+
+/*
+         $("#action").click(function(e)
+         {
+            $("#loadercheckout").show();
+
+            var vals = $("#checkoutform").serialize();
+            alert(vals);
+            $.ajax(
+            {
+               type: "POST",
+               url: "ajaxSaveReturn.php",
+               data: vals,
+               dataType: 'json', // expecting json
+               success: function(msg)
+               {
+                  if(msg.success == true)
+                  {
+                     $("#loadercheckout").hide();
+                     window.location.href = msg.redirect;
+                  }
+                  else
+                  {
+                     alert(msg.msg);
+                     $("#loadercheckout").hide();
+                     return false;
+                  }
+               },
+               failure: function(msg)
+               {
+                  alert('Error!');
+                  return false;
+               }
+            });
+              e.preventDefault();
+         });
+         */
+
+         $("#checkoutform").validationEngine({
+         });
+
+         var displaySubmit=false, newRowCount=<?php if($warranty->numrowsadded) echo $warranty->numrowsadded;else echo "0";?>;
+         var maxRows=100; //also change in orderdetails.php
+         var rowSpeed = 300;
+         var $table = $("#orderReg");
+         var $tableBody = $("tbody",$table);
+         var $addRowBtn = $("#controls #addRow");
+         var $removeAllBtn= $("#controls #removeAllRows");
+         var $submitRowsBtn = $("#controls #submitNewRows");
+         var $hiddenControls = $("#controls .hiddenControls");
+         var blankRowID = "blankRow";
+         var newRowClass = "newRow";
+         var oddRowClass = "rowOdd";
+         var evenRowClass = "rowEven"
+         var hiddenClass = "hidden"
+
+        $addRowBtn.click(function(e){
+            e.preventDefault();
+            addrow();
+         });
+
+
+         $("#order_id").bind('blur', function()
+         {
+            //populateLines();
+            if($('#numRowsAdded').val() == 0)
+               addrow();
+         });
+
+
+           var newRow = $("<?php echo $rowIDs;?>");
+            newRow.find(".removeRow").click(function(){
+            thisRow = $(this).parents("tr");
+            rowRemoved=false;
+            newRowCount--;
+            //alert(newRowCount);
+            $('#numRowsAdded').val(newRowCount);
+            //animate the row
+            thisRow.find("td div").slideUp(300,function(){
+               //this is run once the animation completes
+               if(!rowRemoved){ //this only lets it fire once per row
+                  thisRow.remove();
+                  //make sure alternating rows are correct once a row is removed
+                  if(newRowCount < maxRows)
+                  {
+                     $addRowBtn.removeAttr("disabled");//re-enable the add button
+                  }
+               }
+               rowRemoved=true;
+            });
+            return false; //kill the browser default action
+          }); //close click
+
+         function addrow()
+         {
+
+            if(newRowCount < maxRows){
+               newRowCount++;
+               //get the class on the first row...
+               if($tableBody.find("tr:first-child").hasClass(evenRowClass)){
+                  //the curent first row is even, so we add an odd class
+                  newClasses = hiddenClass+" "+newRowClass+" "+oddRowClass;
+               }else{
+                  //the current first row is odd, so we add an even row
+                  newClasses = hiddenClass+" "+newRowClass+" "+evenRowClass;
+               }
+               //clone the blank row, put the clone at the top, set the correct classes, remove the ID, animate the divs inside
+               //normally I'd use .addClass(), but I want the classes I set to replace the current set classes, so I use .attr("class") to overwrite the classes
+               newRow = $("#blankRow2",$tableBody).clone().prependTo($tableBody).attr("class",newClasses).removeAttr("id").show().find("td div").slideDown(rowSpeed,function(){
+                  //run this once animations finish
+                  //showHideSubmit();
+               });
+
+               //update the ids
+              newQty = 'nqty' + newRowCount;
+              newProd = 'products' + newRowCount;
+              newSize = 'sizes' + newRowCount;
+
+              newrQty = 'rqty' + newRowCount;
+              newrProd = 'rproducts' + newRowCount;
+              newrSize = 'rsizes' + newRowCount;
+
+              $('#nqty').attr({'id' : newQty, 'name' : newQty});
+              $('#products').attr({'id' : newProd, 'name' : newProd});
+              $('#sizes').attr({'id' : newSize, 'name' : newSize});
+
+              $('#rqty').attr({'id' : newrQty, 'name' : newrQty});
+              $('#rproducts').attr({'id' : newrProd, 'name' : newrProd});
+              $('#rsizes').attr({'id' : newrSize, 'name' : newrSize, 'class' : 'sizeclass'});
+
+         <?php
+            if(user_getid() == "1")
+            {
+         ?>
+               newRcv = 'rcv' + newRowCount;
+               newRjt = 'rjt' + newRowCount;
+
+               $('#rcv').attr({'id' : newRcv, 'name' : newRcv});
+               $('#rjt').attr({'id' : newRjt, 'name' : newRjt});
+         <?php
+
+            }
+         ?>
+            $('#' + newQty).change(function(){
+               var curFullID = $(this).attr('id');
+               var curID = curFullID.substr('nqty'.length, curFullID.length);
+               replacementNotRequired = $('#rproducts' + curID).val();
+               if(replacementNotRequired != 'na')
+                  $('#rqty' + curID).val($('#nqty' + curID).val());
+            });
+
+            $('#' + newrQty).keydown(function(){
+               alert('This field will be automatically populated once the returning QTY has been entered.');
+            });
+
+
+               var replacementNotRequired = "";
+               $('#' + newProd).change(function(){
+                  var curFullID = $(this).attr('id');
+                  var curID = curFullID.substr('products'.length, curFullID.length);
+                  populateSizes('#products' + curID, '#sizes' + curID);
+
+                  /*
+                  replacementNotRequired = $('#' + newrProd).val();
+                  if(replacementNotRequired != "na")
+                  {
+                     $('#' + newrQty).addClass("validate[required,custom[number]]");
+                     $('#' + newrProd).addClass("validate[required]");
+                     $('#' + newrSize).addClass("validate[required] sizeclass");
+                  }
+                  else
+                  {
+                     $('#' + newrQty).removeClass("validate[required,custom[number]]");
+                     $('#' + newrProd).removeClass("validate[required]");
+                     $('#' + newrSize).removeClass("validate[required] sizeclass");
+                  }
+                  */
+                  $(".formError").remove();
+               });
+
+
+               $('#' + newrProd).change(function()
+               {
+                  var curFullID = $(this).attr('id');
+                  var curID = curFullID.substr('rproducts'.length, curFullID.length);
+                  replacementNotRequired = $('#' + newrProd).val()
+
+                  populateSizes('#rproducts' + curID, '#rsizes' + curID);
+                  if(replacementNotRequired != "na")
+                  {
+                     $('#' + newrQty).val($('#' + newQty).val());
+                     $('#' + newrQty).addClass("validate[required,custom[number]]");
+                     $('#' + newrProd).addClass("validate[required]");
+                     $('#' + newrSize).addClass("validate[required] sizeclass");
+                  }
+                  else
+                  {
+                     $('#' + newrQty).val('');
+                     $('#' + newrQty).removeClass("validate[required,custom[number]]");
+                     $('#' + newrProd).removeClass("validate[required]");
+                     $('#' + newrSize).removeClass("validate[required] sizeclass");
+                  }
+                  $(".formError").remove();
+               });
+
+
+               //validation
+               $('#' + newQty).addClass("validate[required,custom[number]]");
+               $('#' + newProd).addClass("validate[required]");
+               $('#' + newSize).addClass("validate[required] sizeclass");
+/*
+               if(replacementNotRequired != "na")
+               {
+                  $('#' + newrQty).addClass("validate[required,custom[number]]");
+                  $('#' + newrProd).addClass("validate[required]");
+                  $('#' + newrSize).addClass("validate[required]");
+               }
+*/
+               //Add click event to the remove button on the newly added row
+               newRow.find(".removeRow").click(function(){
+                  thisRow = $(this).parents("tr");
+                  rowRemoved=false;
+                  newRowCount--;
+                  //animate the row
+                  thisRow.find("td div").slideUp(rowSpeed,function(){
+                     //this is run once the animation completes
+                     if(!rowRemoved){ //this only lets it fire once per row
+                        thisRow.remove();
+
+                        //showHideSubmit();
+                        //make sure alternating rows are correct once a row is removed
+                        $tableBody.find("tr:odd").removeClass(evenRowClass).addClass(oddRowClass); //odd rows have an odd class
+                        $tableBody.find("tr:even").removeClass(oddRowClass).addClass(evenRowClass);//even rows have an even class
+                        if(newRowCount < maxRows){
+                           $addRowBtn.removeAttr("disabled");//re-enable the add button
+                        }
+                     }
+                     rowRemoved=true;
+                  });
+                  return false; //kill the browser default action
+               });
+
+               //update the number of rows added
+               $('#numRowsAdded').val(newRowCount);
+            }
+            //disable button so you know you've reached the max
+            if(newRowCount >= maxRows){
+              // $addRowBtn.attr("disabled","disabled");//set the "disabled" property on the button
+            }
+            return false; //kill the browser default action
+         }
+
+         //make return type required.
+        $('#return_type').addClass("validate[required]");
+      });
+
+   </script>
+
+</head>
+
+<body>
+
+   <div id="topHeader" class="cAlign">
+
+      <!-- Logo -->
+      <a href="<?php  echo _CUR_HOST . _DIR ; ?>index.php" id="logo"><img src="<?php  echo _CUR_HOST . _DIR ; ?>_img/dtylink_logo.png" alt="DTY Link - Online Ordering System" /></a>
+      <div style="float:right">
+      <img src="<?php  echo _CUR_HOST . _DIR ; ?>_img/<?php  echo _CLIENT_LOGO; ?>" alt="<?php  echo _CLIENT_ALT; ?>" />
+      </div>
+      <?php
+      //   include('_inc/mainnav.php');
+      ?>
+
+      <div class="cBoth"><!-- --></div>
+   </div> <!-- end topheader -->
+
+   <!-- Category Section -->
+   <div id="categorySection">
+      <div class="cAlign">
+         <!-- Categories -->
+         <?php
+            include('../_inc/middlenav.php');
+         ?>
+
+         <!-- Toggle Button
+         <img src="_img/collapseButton.png" alt="Click here to collapse the panel" class="toggleButton" />
+         <img src="_img/expandButton.png" alt="Click here to expand the panel" class="toggleButton" id="expandButton" />
+-->
+         <div style="clear: both"><!-- --></div>
+      </div>
+   </div> <!-- end categorySection -->
+
+   <!-- Breadcrumbs -->
+   <div id="breadcrumbsSection">
+      <div class="cAlign cFloat">
+         <p>
+            You are here:&nbsp;&nbsp;
+            Home
+            &nbsp;&raquo;&nbsp;Order Management
+            &nbsp;&raquo;&nbsp;Support
+            &nbsp;&raquo;&nbsp;<strong>Make A Claim</strong>
+         </p>
+      </div>
+   </div> <!-- end breacrumbsSection -->
+
+   <div class="cAlign cFloat">
+      <!-- Blog Post List -->
+      <div id="mainSection">
+         <ul id="articles">
+            <li>
+               <div class="articleContent">
+                  <h2>Make A Claim</h2>
+                  <p>
+                  <?php
+                     $claim_date = date('Y-m-d');
+
+      $warranty_id = $warranty->warranty_id;
+      $order_id = $warranty->order_id;
+      $claim_date = $warranty->claim_date;
+      $name = $warranty->name;
+      $phone = $warranty->phone;
+      $reason = $warranty->reason;
+      $status = $warranty->status;
+      $email = $warranty->email;
+                  ?>
+                  <form id="checkoutform" method="post" action="returns.php">
+                     <div class="formrow">
+                        <label>RA No:</label>
+                        <span class="formwrap">
+
+                           <?php
+                           if($warranty_id)
+                            echo '<input type="text" value="'.$warranty_id.'" readonly/>';
+                           ?>
+                        </span>
+                     </div>
+                     <div class="formrow">
+                        <label>Order No:</label>
+                        <span class="formwrap">
+                           <input class="validate[required,length[0,30]] text-input" type="text" name="<?php echo _ORDER_ID;?>" id="<?php echo _ORDER_ID;?>" value="<?php echo $order_id;?>"/>
+                        </span>
+                     </div>
+                     <div class="formrow">
+                        <label>Claim Date:</label>
+                        <span>
+                           <input type="text" name="<?php echo _CLAIM_DATE;?>" value="<?php echo $claim_date;?>" readonly/>
+                        </span>
+                     </div>
+                     <div class="formrow">
+                        <label>Contact Name:</label>
+                        <span>
+                           <input class="validate[required,length[0,50]] text-input" type="text" class="big" name="<?php echo _NAME;?>" id="<?php echo _NAME;?>" value="<?php echo $name;?>" size="50"/>
+                        </span>
+                     </div>
+                     <div class="formrow">
+                        <label>Contact Number:</label>
+                        <span>
+                           <input class="validate[required,length[0,50]] text-input" type="text" class="big" name="<?php echo _PHONE;?>" id="<?php echo _PHONE;?>" value="<?php echo $phone;?>"/>
+                        </span>
+                     </div>
+                     <div class="formrow">
+                        <label>Contact Email:</label>
+                        <span>
+                           <input class="validate[required,custom[email]] text-input" type="text" class="big" name="<?php echo _EMAIL;?>" id="<?php echo _EMAIL;?>" value="<?php echo $email;?>" size="50"/>
+                        </span>
+                     </div>
+                     <div class="formrow">
+                        <label>Returns Type:</label>
+                        <span>
+                           <?php
+                              $returntype = _checkIsSet(_RETURN_TYPE);
+                              if(!$returntype)
+                                 $returntype = $warranty->return_type;
+                              //$onchange = "showElementSelectedIdx("._RETURN_TYPE.")";
+               //               generateStaticCombo($returnTypeArr, $returntype, _RETURN_TYPE);
+                              generateComboDynamic($returnTypeArr, $returntype, _RETURN_TYPE, "required");
+                           ?>
+                        </span>
+                     </div>
+                     <div class="formrow">
+                        <label>Status:</label>
+                        <span>
+                        <?php
+                           if(user_getid() == "1")
+                           {
+                              generateStaticCombo($warrantyStatusArr, $status, _STATUS, "optional");
+                           }
+                           else
+                           {
+                              echo '<input type="text" name="'._STATUS.'" value="'.$status.'" readonly/>';
+//                              echo $status;
+                           }
+                        ?>
+                        </span>
+                     </div>
+                     <div class="formrow">
+                     <?php
+                        if(user_getid() == "1")
+                        {
+                           $msg = _checkIsSet(_MESSAGE);
+                     ?>
+
+                        <label>Add Event</label>
+                         <span>
+                        <input type="text" name="<?php echo _MESSAGE;?>" class="bigger" value="<?php echo $msg;?>">
+                        <!--
+                        <label>Email Event to Claimant</label>
+                        <input type="checkbox" name="emailEvent">
+                        -->
+                     </span>
+                     <?php
+                        }
+                     ?>
+                     </div>
+
+   <div id="controls">
+      <button id="addRow" class="positive">Add Item</button>
+      <button id="removeAllRows" class="negative hiddenControls">Remove all added rows</button>
+      <button id="submitNewRows" class="positive hiddenControls">Submit all added rows</button>
+   </div>
+<br/>
+   <table id="orderReg" cellspacing="0">
+      <colgroup>
+         <col id="column1"></col>
+         <col id="column2"></col>
+         <col id="column3"></col>
+         <col id="column4"></col>
+         <col id="column5"></col>
+         <col id="column6"></col>
+         <col id="column7"></col>
+   <?php
+      if(user_getid() == "1")
+      {
+   ?>
+         <col id="column8"></col>
+         <col id="column9"></col>
+   <?php
+      }
+   ?>
+      </colgroup>
+      <thead>
+         <tr>
+            <th>Garment Ordered/Received</th>
+            <th>Size</th>
+            <th>Qty</th>
+            <th><div style="text-align:center;">&raquo;&nbsp;RETURN FOR&nbsp;&raquo;</div></th>
+            <th>New Garment</th>
+            <th>Size</th>
+            <th>Qty</th>
+            <th>&nbsp;</th>
+   <?php
+      if(user_getid() == "1")
+      {
+   ?>
+            <th>Rcv</th>
+            <th>Rjt</th>
+   <?php
+      }
+   ?>
+         </tr>
+      </thead>
+      <tbody>
+
+         <tr id="blankRow2">
+            <td>
+               <div>
+               <?php
+                  $query = "select item_number, prod_id from products order by item_number";
+//                  $default = _checkIsSet(_STOCK_TYPE);
+                  generateComboQuery("products", $query, $default, "")
+               ?>
+
+               </div>
+            </td>
+            <td>
+               <div>
+                  <select id="sizes" name="sizes">
+                     <option value=""></option>
+                  </select>
+               </div>
+            </td>
+            <td><div><input type="text" name="nqty" id="nqty" size="2"></div></td>
+            <td><div style="text-align:center;">&raquo;</div></td>
+            <td>
+               <div>
+               <?php
+                  $query = "select item_number, prod_id from products order by item_number";
+//                  $default = _checkIsSet(_STOCK_TYPE);
+                  generateComboQueryNA("rproducts", $query, $default, "")
+               ?>
+
+               </div>
+            </td>
+            <td>
+               <div>
+                  <select id="rsizes" name="rsizes">
+                     <option value=""></option>
+                  </select>
+               </div>
+            </td>
+            <td><div><input type="text" name="rqty" id="rqty" size="2" readonly></div></td>
+            <td><div><img class="removeRow" src="../_img/del.png" /><input type="hidden" name="itemID" id="itemID" value=""/></div></td>
+   <?php
+      if(user_getid() == "1")
+      {
+   ?>
+            <td><div><input type="text" name="rcv" id="rcv" size="2"></div></td>
+            <td><div><input type="text" name="rjt" id="rjt" size="2"></div></td>
+   <?php
+      }
+   ?>
+         </tr>
+         <!-- End Row Template -->
+   <?php
+      /*** LOAD SOME HIDDEN VALUES HERE! && CHECK FOR OTHER LINEITEMS AND LOAD ***/
+      if($action == _UPDATE || $warranty->action_type == _UPDATE)
+      {
+
+         $rlarr = $warranty->returnlines;
+
+         for($i = 0; $i < count($rlarr);$i++)
+         {
+            $rl = $rlarr[$i];
+            $w_line_id = $rl->line_id;
+            $w_prod_id = $rl->prod_id;
+            $w_myob_code = $rl->myob_code;
+            $w_qty = $rl->qty;
+            $w_size = $rl->size;
+
+            $w_rprod_id = $rl->rprod_id;
+            $w_rmyob_code = $rl->rmyob_code;
+            $w_rqty = $rl->rqty;
+            $w_rsize = $rl->rsize;
+            $w_rcv = $rl->rcv;
+            $w_rjt = $rl->rjt;
+
+            if($w_line_id > 100)
+            {
+               echo "<input type='hidden' name='w_prod_id$w_line_id' id='w_prod_id$w_line_id' value='$w_prod_id'>";
+               echo "<input type='hidden' name='w_myob_code$w_line_id' id='w_myob_code$w_line_id' value='$w_myob_code'>";
+               echo "<input type='hidden' name='w_qty$w_line_id' id='w_qty$w_line_id' value='$w_qty'>";
+               echo "<input type='hidden' name='w_size$w_line_id' id='w_size$w_line_id' value='$w_size'>";
+
+               echo "<input type='hidden' name='w_rprod_id$w_line_id' id='w_rprod_id$w_line_id' value='$w_rprod_id'>";
+               echo "<input type='hidden' name='w_rmyob_code$w_line_id' id='w_rmyob_code$w_line_id' value='$w_rmyob_code'>";
+               echo "<input type='hidden' name='w_rqty$w_line_id' id='w_rqty$w_line_id' value='$w_rqty'>";
+               echo "<input type='hidden' name='w_rsize$w_line_id' id='w_rsize$w_line_id' value='$w_rsize'>";
+               echo "<input type='hidden' name='w_rcv$w_line_id' id='w_rcv$w_line_id' value='$w_rcv'>";
+               echo "<input type='hidden' name='w_rjt$w_line_id' id='w_rjt$w_line_id' value='$w_rjt'>";
+            }
+            else
+            {
+               $rowClass = "rowEven";
+               if($i%2 == 0)
+                  $rowClass = "rowEven";
+               else
+                  $rowClass = "rowOdd";
+               $rowID = "row$w_line_id";
+               $rowIDs .= "#$rowID,";
+
+   ?>
+               <tr id="<?php echo $rowID;?>" class="<?php echo $rowClass;?>">
+                  <td>
+                     <div>
+                     <?php
+                        $query = "select item_number, prod_id from products order by item_number";
+      //                  $default = _checkIsSet(_STOCK_TYPE);
+                        generateComboQuery("products$w_line_id", $query, $w_prod_id, "required");
+                     ?>
+
+                     </div>
+                  </td>
+                  <td>
+                     <div>
+                     <?php
+                        $query = "select size, size from sizes where prod_id = $w_prod_id";
+                        generateComboQuery("sizes$w_line_id", $query, $w_size, "required");
+                     ?>
+                     </div>
+                  </td>
+                  <td><div><input type="text" name="nqty<?php echo $w_line_id;?>" id="nqty<?php echo $w_line_id;?>" size="2" value="<?php echo $w_qty;?>" class="validate[required,custom[number]] returnqtyclass"></div></td>
+                  <td><div style="text-align:center;">&raquo;</div></td>
+                  <td>
+                     <div>
+                     <?php
+                        $query = "select item_number, prod_id from products order by item_number";
+                        generateComboQueryNA("rproducts$w_line_id", $query, $w_rprod_id, "required");
+                     ?>
+
+                     </div>
+                  </td>
+                  <td>
+                     <div>
+                     <?php
+                        $query = "select size, size from sizes where prod_id = $w_rprod_id";
+                        if($w_rprod_id == 0)
+                           generateComboQuery("rsizes$w_line_id", $query, $w_rsize, "optional");
+                        else
+                           generateComboQuery("rsizes$w_line_id", $query, $w_rsize, "required");
+                     ?>
+                     </div>
+                  </td>
+                  <td>
+                     <div>
+                     <?php
+                     //optional
+                     if($w_rprod_id == 0)
+                     {
+                     ?>
+                        <input type="text" name="rqty<?php echo $w_line_id;?>" id="rqty<?php echo $w_line_id;?>" size="2" value="<?php echo $w_rqty;?>">
+                     <?php
+                     }
+                     else
+                     {
+                     ?>
+                        <input type="text" name="rqty<?php echo $w_line_id;?>" id="rqty<?php echo $w_line_id;?>" size="2" value="<?php echo $w_rqty;?>" class="validate[required,custom[number]]">
+                     <?php
+                     }
+                     ?>
+                     </div>
+                  </td>
+                  <td><div><img class="removeRow" src="../_img/remove.png" /><input type="hidden" name="itemID" id="itemID" value=""/></div></td>
+
+            <?php
+               if(user_getid() == "1")
+               {
+            ?>
+                     <td><div><input type="text" name="rcv<?php echo $w_line_id;?>" id="rcv<?php echo $w_line_id;?>" size="2" value="<?php echo $w_rcv;?>"></div></td>
+                     <td><div><input type="text" name="rjt<?php echo $w_line_id;?>" id="rjt<?php echo $w_line_id;?>" size="2" value="<?php echo $w_rjt;?>"></div></td>
+            <?php
+               }
+            }
+         }
+         $rowIDs = substr($rowIDs, 0, strlen($rowIDs)-1);
+         //remove rows for rows added
+        ?>
+        <script>
+        jQuery(document).ready(function() {
+               <?php
+                  if($w_rmyob_code == "na")
+                  {
+               ?>
+                     jQuery('#rqty' + <?php echo $w_line_id;?>).val('');
+                <?php
+                  }
+                ?>
+
+               //jQuery('#' + <?php echo "'rproducts$w_line_id'";?>).change(function(){
+               $('.naProductClass').change(function(){
+                  var curFullID = jQuery(this).attr('id');
+                  var curID = curFullID.substr('rproducts'.length, curFullID.length);
+                  replacementNotRequired = jQuery('#' + curFullID).val()
+                  //alert(replacementNotRequired);
+                  if(replacementNotRequired != 'na')
+                  {
+                     populateSizes('#products' + curID, '#rsizes' + curID);
+                     jQuery('#rqty' + curID).addClass("validate[required,custom[number]]");
+                     jQuery('#rsizes' + curID).addClass("validate[required] sizeclass");
+                     jQuery('#rqty' + curID).val(jQuery('#nqty' + curID).val());
+                  }
+                  else
+                  {
+                     jQuery('#rsizes' + curID).empty();
+                     jQuery('#rqty' + curID).val('');
+                     jQuery('#rsizes' + curID).removeClass("validate[required] sizeclass");
+                     jQuery('#rqty' + curID).removeClass("validate[required,custom[number]]");
+                  }
+                  $(".formError").remove();
+               });
+
+               $('#'+ <?php echo "'rqty$w_line_id'";?>).keydown(function(){
+                  alert('This field will be automatically populated once the returning QTY has been entered.');
+               });
+
+               $('.returnqtyclass').change(function(){
+                  var curFullID = $(this).attr('id');
+                  var curID = curFullID.substr('nqty'.length, curFullID.length);
+                  var newQty = 'nqty' + curID;
+                  replacementNotRequired = $('#rproducts' + curID).val();
+                  if(replacementNotRequired != 'na')
+                     $('#rqty' + curID).val($('#' + newQty).val());
+               });
+
+               //$('#' + <?php echo "'products$w_line_id'";?>).change(function(){
+               $('.ProductClass').change(function(){
+                  var curFullID = jQuery(this).attr('id');
+                  // alert(curFullID);
+                  var curID = curFullID.substr('products'.length, curFullID.length);
+                  populateSizes('#products' + curID, '#sizes' + curID);
+                  $(".formError").remove();
+               });
+        });
+        </script>
+   <?php
+
+      }
+
+   ?>
+
+      </tbody>
+   </table>
+
+
+
+       <fieldset>
+         <legend>Comments</legend>
+         <textarea id="<?php echo _REASON;?>" name="<?php echo _REASON;?>" rows="10" cols="40"><?php echo stripslashes($reason);?></textarea>
+       </fieldset>
+
+
+       <fieldset>
+         <!--<legend>Event Log</legend>-->
+         <h3>Returns Event Log</h3>
+         <table id="highlight-table3" cellspacing="0" cellpadding="0">
+          <thead>
+              <th width="20px"><input type="checkbox" name="checkAll" id="checkAll" onclick="jqCheckAll(this.id, 'registerBox');"></th>
+              <th width="110px" align="left">Date</th>
+              <th width="220px" align="left">Event</th>
+              <th width="90px" align="left">Author</th>
+          </thead>
+            <tbody>
+            <?php
+               $warranty->printEventLog();
+            ?>
+            <tr></tr>
+            </tbody>
+         </table>
+       </fieldset>
+
+       </fieldset>
+
+       <br/>
+       <table>
+         <tr>
+            <td>
+               <input type="submit" class="button" name="action" id="action" value="SUBMIT"/>
+            </td>
+         </tr>
+      </table>
+
+
+       <input type="hidden" name="<?php echo _WARRANTY_ID;?>" value="<?php echo $warranty_id;?>" />
+
+    </div>
+
+    <input type="hidden" name="numRowsAdded" id="numRowsAdded" value="<?php echo $warranty->numrowsadded;?>"/>
+    <!--plist-->
+
+    </form>
+
+                  </p>
+
+                  <p>
+                  DTYLink v2.0
+                  </p>
+
+               </div>
+            </li>
+
+         </ul>
+
+         <!-- Pagination --
+         <ul id="pagination">
+            <li><a href="#" class="active">1</a></li>
+            <!--
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+
+         </ul>-->
+
+      </div> <!-- end mainSection -->
+
+      <!-- Sidebar -->
+      <div id="sidebar">
+
+      </div> <!-- end sidebar -->
+
+   </div>
+
+   <?php
+      include('../_inc/footer.php');
+   ?>
+
+
+
+   <!-- Copyright info -->
+   <div id="copyrightSection">
+
+      <!--<img src="_img/basicsSmallLogo.png" alt="Designs To You" />-->
+
+      <p>&copy; Copyright 2011 Designs To You Pty Ltd. All rights reserved.</p>
+
+   </div> <!-- end copyrightSection -->
+
+</body>
+</html>
+<?php
+   //save the session
+$_SESSION[_WARRANTY_SESSION] = serialize($warranty);
+unset($_SESSION['msg'])
+
+?>

@@ -1,0 +1,208 @@
+<?php
+session_start();
+   error_reporting(E_ALL);
+   ini_set("display_errors", 1);
+$home = dirname(__FILE__) . "/../";
+$lib = $home ."/lib/";
+
+require_once($home . '/globals.php');
+require_once($lib . 'functions.php');
+require_once($lib . 'loginfunctions.php');
+require_once($lib . 'htmlGenerator.php');
+
+$action = _checkIsSet("action");
+
+if(!user_isloggedin())
+{
+   header("Location: " . _CUR_HOST. _DIR);
+}
+
+
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+   <title>Designs To You - DTYLink Online Ordering</title>
+   <?php include('../_inc/js_css.php');?>
+   <link rel="stylesheet" type="text/css" href="<?php  echo _CUR_HOST . _DIR ; ?>_css/page.css" media="screen" />
+   <link rel="stylesheet" type="text/css" href="<?php  echo _CUR_HOST . _DIR ; ?>_css/table.css" media="screen" />
+   <link rel="stylesheet" type="text/css" href="<?php  echo _CUR_HOST . _DIR ; ?>_css/table-jui.css" media="screen" />
+</head>
+
+<script type="text/javascript">
+$(document).ready(function()
+{
+   $("#articleCommentForm").validationEngine();
+   $('#box-table-a').dataTable({
+      "aLengthMenu": [[-1,10, 25, 50, 100], ["All", 10, 25, 50, 100]],
+      "iDisplayLength":10,
+      "aoColumns": [
+      null,
+      null,
+      null,
+      null,
+      { "sType": 'currency' }
+      ]
+   });
+
+   jQuery.fn.dataTableExt.oSort['currency-asc'] = function(a,b) {
+      /* Remove any formatting */
+      var x = a == "-" ? 0 : a.replace( /[^\d\-\.]/g, "" );
+      var y = b == "-" ? 0 : b.replace( /[^\d\-\.]/g, "" );
+
+      /* Parse and return */
+      x = parseFloat( x );
+      y = parseFloat( y );
+      return x - y;
+   };
+
+   jQuery.fn.dataTableExt.oSort['currency-desc'] = function(a,b) {
+      var x = a == "-" ? 0 : a.replace( /[^\d\-\.]/g, "" );
+      var y = b == "-" ? 0 : b.replace( /[^\d\-\.]/g, "" );
+
+      x = parseFloat( x );
+      y = parseFloat( y );
+      return y - x;
+   };
+
+});
+</script>
+
+<body>
+
+   <div id="topHeader" class="cAlign">
+
+      <!-- Logo -->
+      <a href="<?php  echo _CUR_HOST . _DIR ; ?>index.php" id="logo"><img src="<?php  echo _CUR_HOST . _DIR ; ?>_img/dtylink_logo.png" alt="DTY Link - Online Ordering System" /></a>
+      <div style="float:right">
+      <img src="<?php  echo _CUR_HOST . _DIR ; ?>_img/<?php  echo _CLIENT_LOGO; ?>" alt="<?php  echo _CLIENT_ALT; ?>" />
+      </div>
+      <?php
+      //   include('_inc/mainnav.php');
+      ?>
+
+      <div class="cBoth"><!-- --></div>
+   </div> <!-- end topheader -->
+
+   <!-- Category Section -->
+   <div id="categorySection">
+      <div class="cAlign">
+         <!-- Categories -->
+         <?php
+            include('../_inc/middlenav.php');
+         ?>
+
+         <!-- Toggle Button
+         <img src="_img/collapseButton.png" alt="Click here to collapse the panel" class="toggleButton" />
+         <img src="_img/expandButton.png" alt="Click here to expand the panel" class="toggleButton" id="expandButton" />
+-->
+         <div style="clear: both"><!-- --></div>
+      </div>
+   </div> <!-- end categorySection -->
+
+   <!-- Breadcrumbs -->
+   <div id="breadcrumbsSection">
+      <div class="cAlign cFloat">
+         <p>
+            You are here:&nbsp;&nbsp;
+            Home
+            &nbsp;&raquo;&nbsp;Order Management
+            &nbsp;&raquo;&nbsp;Reports
+            &nbsp;&raquo;&nbsp;<strong>List Wage Deductions</strong>
+         </p>
+      </div>
+   </div> <!-- end breacrumbsSection -->
+
+   <div class="cAlign cFloat">
+      <!-- Blog Post List -->
+      <div id="mainSection">
+         <ul id="articles">
+            <li>
+               <div class="articleContent">
+                  <h2>List Wage Deductions</h2>
+                  <p>
+                     <form action="" method="post" id="checkoutform">
+                        <table id="box-table-a">
+                           <thead>
+                           <tr>
+                              <th>Date</th>
+                              <th>Orde No</th>
+                              <th>Employee ID</th>
+                              <th>Name</th>
+                              <th>Deduction Amt</th>
+                           </tr>
+                           </thead>
+                           <tbody>
+                           <?php
+                              if(minAccessLevel(_ADMIN_LEVEL))
+                                 $query = "select * from orders where payable > 0 and iswages = 'Y' order by order_time desc";
+                              else
+                                 $query = "select * from orders where user_id = " . $_SESSION[_USER_ID] . " and payable > 0 and iswages = 'Y' order by order_time desc";
+
+                              $res = db_query($query);
+                              $num = db_numrows($res);
+                              if($num > 0)
+                              {
+                                 for($i = 0; $i < $num; $i++)
+                                 {
+                                    $date = db_result($res, $i, "order_time");
+                                    $dateArr = explode(" ", $date);
+                                    $date = $dateArr[0];
+                                    $order_id = db_result($res, $i, "order_id");
+                                    $user_id = db_result($res, $i, "user_id");
+                                    $payable = db_result($res, $i, "payable");
+                                    $location = db_result($res, $i, "sname");
+                                    $name = db_result($res, $i, "name");
+                                    $status = db_result($res, $i, "status");
+                                    $urllink =  _CUR_HOST . _DIR . "products/checkout.php?order_id=$order_id&action=" . _UPDATE;
+                                    $pdflink = _CUR_HOST . _DIR . "products/pdf.php?order_id=$order_id";
+
+                                    $orderLink = "<a href='$urllink'>$order_id</a>";
+
+                           ?>
+                                    <tr>
+                                       <td><?php echo $date;?></td>
+                                       <td><a href="<?php echo $pdflink;?>"><img src="../_img/pdf.png" border="0"/></a>&nbsp;<?php echo $orderLink;?></td>
+                                       <td><?php echo $user_id;?></td>
+                                       <td><?php echo $name;?></td>
+                                       <td>$<?php echo formatNumber($payable);?></td>
+                                    </tr>
+                           <?php
+                                 }
+                              }
+                           ?>
+                           </tbody>
+                        </table>
+                     </form>
+                  </p>
+
+               </div>
+            </li>
+
+            <li>
+
+                  <p>
+                  DTYLink v2.0
+                  </p>
+            </li>
+
+         </ul>
+      </div> <!-- end mainSection -->
+
+      <!-- Sidebar -->
+      <div id="sidebar">
+
+      </div> <!-- end sidebar -->
+
+   </div>
+
+   <?php
+      include('../_inc/footer.php');
+   ?>
+
+
+
+</body>
+</html>

@@ -1,0 +1,527 @@
+<?php
+   error_reporting(E_ALL);
+   ini_set("display_errors", 1);
+session_start();
+$home = dirname(__FILE__);
+$lib = $home ."/lib/";
+
+echo "home: $home<BR>";
+echo "lib: $lib<BR>";
+
+
+require_once($lib . 'database.php');
+require_once($lib . 'functions.php');
+require_once($lib . 'dbfunctions.php');
+require_once($home . '/globals.php');
+
+
+$action = _checkIsSet("action");
+
+function determineAccessLevel($jobclass)
+{
+//   echo "$jobclass<BR>";
+//   echo stristr($jobclass, "Manager") . "<BR>";
+   $pos =  preg_match("/Manager|mgr/i", $jobclass);
+   if($pos == 1)
+   {
+      return 1;
+   }
+   else
+   {
+      return 2;
+   }
+}
+
+if($action == "submit")
+{
+   if ($_FILES["file"]["error"] > 0)
+   {
+      $_SESSION['msg'] = '<font color="'._FAILED_COLOR.'">ERROR UPLOADING FILE, PLEASE TRY AGAIN</font>';
+   }
+   else
+   {
+      $target_path = "$home/uploads/";
+      $target_path = $target_path . basename($_FILES['file']['name']);
+     $filename = $_FILES['file']['tmp_name'];
+
+      echo "FILENAME: $filename [$target_path]<BR>";
+   }
+
+   echo "<table><tr><td>STAFF ID</td><td>Username</td><td>Surname</td><td>Firstname</td><td>ROLE</td><td>Allowance</td><td>LocationID</td><td>Hire Date</td><td>addy</td><tr>";
+   if(($handle = fopen($filename,"r")) == NULL)
+   {
+      echo "FAILED TO OPEN FILE<BR>";
+   }
+   else
+   {
+      $contents = fgets($handle);
+//      echo "$contents<BR>";
+      $j = 1;
+         //delete from update table;
+         $query = "delete from login_update";
+
+         $res = db_query($query);
+         if(!$res)
+            echo "ERROR!!<BR>";
+      while(!feof($handle))
+      {
+
+         $contents = fgets($handle);
+         //echo "$contents<BR><BR>";
+         $lineArr = explode(",", $contents);
+
+if($lineArr[20] === null)
+   echo " NOT SET $contents<BR>";
+
+         $staffid = trim($lineArr[0]);
+         $surname = trim($lineArr[1]);
+         $firstname = trim($lineArr[2]);
+         //trim($lineArr[3]); //location id
+         $jobClass = trim($lineArr[4]);
+         $gender =  trim($lineArr[5]);
+         $payFreq = trim($lineArr[6]);
+         $startDate = trim($lineArr[7]);
+         //trim($lineArr[8]); //branch id
+         $branchNo = trim($lineArr[9]);
+         $username = trim($lineArr[10]);
+//         echo "un: $username<BR>";
+         $email = trim($lineArr[11]);
+         //trim($lineArr[12]); //phone
+         //trim($lineArr[13]); //mobile
+         $firstAllowance = trim($lineArr[14]);
+         $secondAllowance = trim($lineArr[15]);
+         $role = trim($lineArr[16]);
+         $street = trim($lineArr[17]);
+         $suburb = trim($lineArr[18]);
+         $state = trim($lineArr[19]);
+         $postcode = trim($lineArr[20]);
+
+          $location_id = md5(strtoupper($branchNo) . strtoupper($street) . strtoupper($suburb). strtoupper($postcode));
+//echo "1[$firstAllowance] 2[$secondAllowance]<BR>";
+
+         if($payFreq == "F")
+            $payFreq = "Fortnightly";
+         else if($payFreq == "M")
+            $payFreq = "Monthly";
+
+         $status = "ACTIVE";
+         $isAUS = "Y";
+
+         if($firstAllowance == "#N/A")
+            $firstAllowance = 0;
+
+         if($secondAllowance == "#N/A")
+            $secondAllowance = 0;
+
+          if($role == "#N/A")
+            $role = "Corporate";
+
+          if($branchNo == "#N/A")
+            $branchNo = 3980;
+
+          if($username == "#N/A")
+            $username = $staffid;
+
+
+         if($state == "New Zealand")
+            $isAUS = "N";
+
+         if($gender == "Female")
+            $gender = "1";
+         else
+            $gender = "2";
+
+         $password = md5("Reece");
+         $accesslevel = determineAccessLevel($jobClass);
+         $realm = "REECE";
+
+            $role_id = "";
+            switch($role)
+            {
+               case "Corporate":
+                  $role_id = 1;
+                  break;
+               case "Retail":
+                  $role_id = 2;
+                  break;
+               case "Trade":
+                  $role_id = 3;
+                  break;
+            }
+
+               $query = "select * from login_update where user_id = $staffid";
+//               echo "$query<BR>";
+               $res = db_query($query);
+               $numrows = db_numrows($res);
+         $query = "INSERT INTO login_update (user_id, location_id, user_name, firstname, lastname, password, access_level, email, allowance, allowance2, realm, role_id, status, isaus, crange, job_classification, pay_frequency, start_date) VALUES ($staffid, '$location_id', '$username', \"$firstname\", \"$surname\", '$password', $accesslevel, \"$email\", $firstAllowance, $secondAllowance, '$realm',  $role_id, '$status', '$isAUS', '$gender', \"$jobClass\", '$payFreq', '$startDate');";
+
+               if($numrows > 0)
+               {
+                  //exists
+
+               }
+               else
+               {
+                  echo "$query $numrows<BR>";
+                  db_query($query);
+
+//               if($startDate < "2011-11-26")
+//               {
+//                  $secondAllowance = "250";
+//               }
+//               else
+//                  $firstAllowance = 500;
+//               //echo "statedate: $startDate a: $allowance<BR>";
+
+               /*
+               $query = "insert into allowance(user_id, allowance, start, end) values($staffid, $allowance, '2012-11-25','2013-11-25')";
+               db_query($query);
+               */
+             }
+
+
+
+
+//         echo "$query<BR>";
+
+//         echo "$query<BR>";
+//         if(!$res)
+//            echo "$query<BR>";
+
+//         echo "$query<BR>";
+         echo "<tr><td>$staffid</td><td>$username</td><td>$surname</td><td>$firstname</td><td>$role_id</td><td>$firstAllowance | $secondAllowance</td><td>$branchNo</td><td>$startDate</td><td>$branchNo $street $suburb $postcode </td><tr>";
+      } //end insert update table
+
+      //check old table
+
+      $query = "select * from login";
+      $res = db_query($query);
+      $num = db_numrows($res);
+      if($num > 0)
+      {
+         for($i = 0; $i < $num; $i++)
+         {
+            $user_id = db_result($res, $i, "user_id");
+            $location_id = db_result($res, $i, "location_id");
+            $user_name = db_result($res, $i, "user_name");
+            $firstname = db_result($res, $i, "firstname");
+            $lastname = db_result($res, $i, "lastname");
+            $access_level = db_result($res, $i, "access_level");
+            $email = db_result($res, $i, "email");
+            $role_id = db_result($res, $i, "role_id");
+            $crange = db_result($res, $i, "crange");
+            $job_classification = db_result($res, $i, "job_classification");
+            $status = db_result($res, $i, "status");
+            $isAUS = db_result($res, $i, "isaus");
+            $pay_frequency = db_result($res, $i, "pay_frequency");
+
+           //check the update database if it doesn't exist make inactive!!
+            $query2 = "select * from login_update where user_id = $user_id";
+            $res2 = db_query($query2);
+            $num2 = db_numrows($res2);
+
+            if($num2 == 0)
+            {
+               if($user_id != 1 && $user_id != 2 && $user_id != 23911231 && $user_id != 23911232 && $user_id != 23911233 && $user_id != 23911229 && $user_id != 1111 && $user_id != 23911247 && $user_id != 15561 && $user_id != 11709)
+               {
+                  $updatequery = "update login set status = 'INACTIVE' where user_id = $user_id";
+                  echo "$updatequery<BR>";
+                  db_query($updatequery);
+               }
+            }
+            else //just update? do we really need to hash???
+            {
+               //$user_id = db_result($res, 0, "user_id");
+               $location_id = db_result($res2, 0, "location_id");
+               $user_name = db_result($res2, 0, "user_name");
+               $firstname = db_result($res2, 0, "firstname");
+               $lastname = db_result($res2, 0, "lastname");
+               //allowance from update table
+               $firstallowance = db_result($res2, 0, "allowance");
+               $secondallowance = db_result($res2, 0, "allowance2");
+
+//echo "1. $firstallowance 2. $secondallowance<BR>";
+
+               $access_level = db_result($res2, 0, "access_level");
+
+               $adminArr = array("1546","5662","12656","8221","14797","15020","1111", "5585");
+               if(in_array($user_id, $adminArr))
+               {
+                  echo "USER_ID: $user_id set as admin<BR>";
+                  $access_level = "0";
+               }
+
+               //determineAccessLevel($jobclass);
+               $email = db_result($res2, 0, "email");
+               $role_id = db_result($res2, 0, "role_id");
+               $crange = db_result($res2, 0, "crange");
+               $job_classification = db_result($res2, 0, "job_classification");
+               $status = "ACTIVE";
+               $isAUS = db_result($res2, 0, "isaus");
+               $pay_frequency = db_result($res2, 0, "pay_frequency");
+               $startDate = db_result($res2, 0, "start_date");
+//echo " $user_name JOB: $job_classification AL: $access_level<BR>";
+               $updatequery = "UPDATE  login SET  location_id =  '$location_id',
+user_name =  '$user_name',
+firstname =  '$firstname',
+lastname =  '$lastname',
+allowance =  '$firstallowance',
+allowance2 =  '$secondallowance',
+access_level =  '$access_level',
+email =  '$email',
+role_id =  '$role_id',
+crange =  '$crange',
+job_classification =  '$job_classification',
+status =  '$status',
+isAUS =  '$isAUS',
+start_date =  '$startDate',
+pay_frequency =  '$pay_frequency' WHERE  user_id =$user_id;";
+               db_query($updatequery);
+//echo "$updatequery<BR>";
+               $minusAmt = 0;
+               if($role_id == 2)
+               {
+                  if($crange == 1)
+                     $minusAmt = 279.62;
+                  else if($crange == 2)
+                     $minusAmt = 273.68;
+               }
+               else if($role_id == 3)
+               {
+                  if($crange == 1)
+                     $minusAmt = 245.63;
+                  else if($crange == 2)
+                     $minusAmt = 256.96;
+               }
+
+
+               if($isAUS == "N")
+               {
+                  if($firstallowance == 250)
+                     $firstallowance = 285;
+                  else if($firstallowance == 400)
+                     $firstallowance = 455;
+                  else if($firstallowance == 500)
+                     $firstallowance = 570;
+
+                  if($secondallowance == 250)
+                     $secondallowance = 285;
+                  else if($secondallowance == 400)
+                     $secondallowance = 455;
+                  else if($secondallowance == 500)
+                     $secondallowance = 570;
+
+                  $minusAmt *= 1.25;
+               }
+
+               //update allowance;
+               if($startDate < "2011-11-26")
+               {
+                  $allowance = $secondallowance;
+                  $strTime = "2012-11-25";
+                  $endTime = "2013-11-25";
+               }
+               else
+               {
+                  $allowance = $firstallowance - $minusAmt;
+                  $plus6months = strtotime(date("Y-m-d", strtotime($startDate)) . "+6 month");
+                  $plus1year = strtotime(date("Y-m-d", strtotime($startDate)) . "+1 year");
+
+                  $strTime = date('Y-m-d', $plus6months);
+                  $endTime = date('Y-m-d', $plus1year);
+
+
+               }
+
+               //need to fix this!! what happens if there is multiple allowances???
+
+               $query = "select * from allowance where user_id = $user_id order by allowance_id desc";
+               $alRes = db_query($query);
+               $alNum = db_numrows($alRes);
+               if($alNum > 0)
+               {
+                  //determine first or 2nd year allowance from the start date
+                  $dateNow = date('Y-m-d');
+                  $yearStart = date('Y', strtotime($startDate));
+                  $yearNow = date('Y', strtotime($dateNow));
+
+//echo "year start: $yearStart now: $yearNow<BR>";
+
+                  $modyear = ($yearNow - $yearStart)%2;
+                  if($modyear == 0)
+                     $allowance = $firstallowance;
+                  else
+                     $allowance = $secondallowance;
+
+                  $allowance = $secondallowance; /* ALWAYS 2nd YEAR!! */
+
+                  //get the end date, if < than NOW, roll over to first year
+                  /** UPDATE: NEVER USE FIRST YEAR ALLOWANCE AFTER THE FIRST YEAR, ALWAYS 2nd YEAR ALLOWANCE FOR TOP UPS */
+
+                  $end = db_result($alRes, 0, "end");
+
+                  $plus1Day = strtotime(date("Y-m-d", strtotime($end)) . "+1 day");
+                  $plus1year = strtotime(date("Y-m-d", strtotime($end)) . "+1 year");
+
+                  $strTime = date('Y-m-d', $plus1Day);
+                  $endTime = date('Y-m-d', $plus1year);
+
+                  if(strlen($end) > 0)
+                  {
+                     if($end < $dateNow)
+                     {
+                        $pattern = '/^(\d+){4}\-/';
+                        $yearNow = $yearNow + 1;
+                        $replacement = "$yearNow-";
+
+                        $endTime = preg_replace($pattern, $replacement, $startDate);
+
+                        echo "$endTime<BR>";
+                        echo "im rolling over to mod: $modyear allowance of $allowance for: $user_id  now: $dateNow expiry: $endTime<BR>";
+                        $query = "insert into allowance(user_id, allowance, start, end) values($user_id, $allowance, '$strTime','$endTime')";
+                        echo "$query<BR>";
+                        db_query($query);
+                     }
+
+                  }
+               }
+/*
+                  echo "ALERT! User ID: $user_id has more than 1 allowance!!<BR>";
+               else
+               {
+                  echo "UID: $user_id HIREDATE: $startDate START: $strTime END: $endTime<BR>";
+                  //check allowance dont update if its different
+                  $tmpAllowance = db_result($alRes, 0, "allowance");
+                  if($tmpAllowance != $allowance)
+                  {
+                      $query = "update allowance set allowance = $allowance, start='$strTime', end='$endTime' where user_id = $user_id";
+                     //echo "$isAUS $query<BR>";
+                      db_query($query);
+                  }
+               }
+              */
+
+
+            }
+         }
+      }
+
+         //now look for new staff in the update table
+         $query = "SELECT
+login_update.user_id, login_update.allowance, login_update.allowance2, login_update.start_date,
+login_update.user_id, login_update.location_id, login_update.user_name, login_update.firstname, login_update.lastname, login_update.password, login_update.access_level, login_update.email, login_update.allowance, login_update.realm, login_update.role_id, login_update.status, login_update.isaus, login_update.crange, login_update.job_classification, login_update.pay_frequency
+FROM login_update  LEFT JOIN login ON login_update.user_id = login.user_id WHERE login.user_id IS NULL;";
+         $res = db_query($query);
+         $num = db_numrows($res);
+         if($num > 0)
+         {
+            for($i = 0; $i < $num; $i++)
+            {
+               $user_id = db_result($res, $i, "user_id");
+               //echo "$user_id<BR>";
+               $location_id = db_result($res, $i, "location_id");
+               $user_name = db_result($res, $i, "user_name");
+               $firstname = db_result($res, $i, "firstname");
+               $lastname = db_result($res, $i, "lastname");
+               $access_level = db_result($res, $i, "access_level");
+               $email = db_result($res, $i, "email");
+               $role_id = db_result($res, $i, "role_id");
+               $crange = db_result($res, $i, "crange");
+               $job_classification = db_result($res, $i, "job_classification");
+               $startDate = db_result($res, $i, "start_date");
+
+               $firstallowance = db_result($res, $i, "allowance");
+               $secondallowance = db_result($res, $i, "allowance2");
+
+               $status = "ACTIVE";
+               $password = md5("Reece");
+               //$accesslevel = 2;
+               $realm = "REECE";
+               $isAUS = db_result($res, $i, "isaus");
+               $pay_frequency = db_result($res, $i, "pay_frequency");
+
+               if($isAUS == "N")
+               {
+                  $firstallowance *= 1.25;
+                  $secondallowance *= 1.25;
+               }
+
+
+               $query = "INSERT INTO login (user_id, location_id, user_name, firstname, lastname, password, access_level, email, allowance, allowance2, realm, role_id, status, isaus, crange, job_classification, pay_frequency, start_date) VALUES
+ ($user_id, '$location_id' , '$user_name', \"$firstname\", \"$lastname\", '$password', $access_level, \"$email\", $firstallowance,$secondallowance, '$realm',  $role_id, '$status', '$isAUS', '$crange', \"$job_classification\", '$pay_frequency', '$startDate')";
+               db_query($query);
+
+               $minusAmt = 0;
+               if($role_id == 2)
+               {
+                  if($crange == 1)
+                     $minusAmt = 279.62;
+                  else if($crange == 2)
+                     $minusAmt = 273.68;
+               }
+               else if($role_id == 3)
+               {
+                  if($crange == 1)
+                     $minusAmt = 245.63;
+                  else if($crange == 2)
+                     $minusAmt = 256.96;
+               }
+
+               //update allowance;
+               if($startDate < "2011-11-26")
+               {
+                  $allowance = $secondallowance;
+                  $strTime = "2012-11-25";
+                  $endTime = "2013-11-25";
+                  echo "START LESS THAN: $startDate UID:$user_id<BR>";
+               }
+               else
+               {
+                  /** if user not found in table, means location for the user was not found i.e. location does not match
+                   * the md5 location ID... mostly due to #N/A
+                   */
+                  echo "START GREATER: $startDate UID:$user_id<BR>";
+                  $allowance = $firstallowance - $minusAmt;
+                  $plus6months = strtotime(date("Y-m-d", strtotime($startDate)) . "+6 month");
+                  $plus1year = strtotime(date("Y-m-d", strtotime($startDate)) . "+1 year");
+
+                  $strTime = date('Y-m-d', $plus6months);
+                  $endTime = date('Y-m-d', $plus1year);
+
+                  echo "hire: $startDate start: $strTime end: $endTime UID:$user_id<BR>";
+               }
+
+
+               $query = "insert into allowance(user_id, allowance, start, end) values($user_id, $allowance, '$strTime','$endTime')";
+               db_query($query);
+            }
+         }
+   }
+   echo "</table>";
+//   echo "J: $j<BR>";
+//      else
+//      {
+//         $i = 0;
+//         $_SESSION['msg'] = "";
+//         while (!feof($handle))
+//         {
+//            $contents = fgets($handle, 1024);
+
+}
+
+?>
+
+<html>
+<body>
+
+<form enctype="multipart/form-data" name="list" method="post">
+<br>
+File:<input type="file" size="50" name="file"><br>
+
+<input type="submit" name="action" value="submit">
+
+</form>
+
+
+</body>
+</html>

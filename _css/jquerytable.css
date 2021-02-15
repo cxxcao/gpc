@@ -1,0 +1,251 @@
+
+/*______________________________ Buttons */
+
+#nqty
+{
+	width:20px;
+}
+
+#controls{margin:0 0 0 0;}
+/*
+button{
+	background-color:#19B7DE;
+	color:#565656;
+	border:1px solid #abb6bf;
+    border-top:1px solid #EEE;
+    border-left:1px solid #EEE;
+	padding:0.3em 0.3em 0.3em 18px;
+	margin:0 0.2em;
+	cursor:pointer;
+	background-repeat:no-repeat !important;
+	background-position:2px center !important;
+}*/
+#addRow:hover{
+	background-color: #ffffff;
+   color:#19B7DE;
+   text-decoration: none;
+   cursor: pointer;
+   
+}
+button:active{color:#CCC !important;}
+/* Positive actions 
+button.positive{color:#4c8318;}
+button.positive:hover{background-color:#d9f3ea !important;color:#396212;}
+button.positive:active{background-color:#3d5b40 !important;}*/
+/* Negative actions */
+button.negative{color:#d12f19;}
+button.negative:hover{background-color:#eca8a8 !important;color:#d12f19;}
+button.negative:active{background-color:#782c21 !important;}
+
+/* search actions */
+button.search{color:#2556ab;}
+button.search:hover{background-color:#a7cdf0 !important;color:#2556ab;}
+button.search:active{background-color:#295aa8 !important;}
+
+/* back actions */
+button.back{color:#2556ab;}
+button.back:hover{background-color:#a7cdf0 !important;color:#2556ab;}
+button.back:active{background-color:#295aa8 !important;}
+
+/* Delete/trash actions */
+button.delete{color:#d12f19;}
+button.delete:hover{background-color:#eca8a8 !important;color:#d12f19;}
+button.delete:active{background-color:#782c21 !important;}
+
+/* Specific Buttons */
+#deleteButton{background-image:url('img/trash.png') !important;}
+#searchButton{background-image:url('img/search.png') !important;}
+/*#addRow{background-image:url('../_img/add.png') !important; margin:10px;}*/
+#addRow{
+   border: none;
+   outline: none;
+   background-color: #19B7DE;
+   /*
+   border-radius: 5px;
+   -moz-border-radius: 5px;
+   -webkit-border-radius: 5px;
+   */
+   height: 35px;
+   padding: 0 15px;
+   font-size: 12px;
+   color: white;
+   /* Some CSS3 Transitions */
+   -webkit-transition: color 0.2s ease-in-out;
+   -moz-transition: color 0.2s ease-in-out;
+   -o-transition: color 0.2s ease-in-out;
+   transition: color 0.2s ease-in-out;   
+	}
+#submitNewRows{background-image:url('img/submit.png') !important;}
+#removeAllRows, .removeRow{background-image:url('../img/del.png') !important;}
+#removeAllErrorMsg{background-image:url('../img/del.png') !important;}
+#backBtn{background-image:url('img/back.png') !important;}
+/* Disabled Buttons */
+button[disabled], button[disabled]:hover, button[disabled]:active{
+	color:#666 !important;
+	background-color:#CCC !important;
+	border:1px solid #EEE;
+	cursor:wait;
+}
+
+img.removeRow {cursor:pointer;}
+
+
+/*______________________________ Tables */
+.graphTable{width:680px;margin:1em;border-collapse: collapse;}
+.graphTable thead tr th{
+   background:#678b3f;
+   color:#fff;
+   border-width: 1px;
+   border-spacing: 0px;
+   border-style: solid;
+   border-color: #000;
+}
+.graphTable tbody tr.rowEven{background:#eef3df;}
+.graphTable tbody tr.rowOdd{background:#d5e5b8;}
+.graphTable tbody tr:hover{background-color: #8cb85c;}
+.graphTable tbody tr td{
+   border-width: 1px;
+   border-spacing: 0px;
+   border-style: solid;
+   border-color: #000;
+   padding:2px;
+   text-align:center;
+}
+
+
+/*______________________________ Tables 
+#myTable{width:680px;margin:0.2em;border-collapse: collapse;}
+#myTable #column1{width:10px;}
+#myTable #column2{width:44px;}
+#myTable #column3{width:165px;}
+#myTable #column4{width:100px;}
+#myTable #column5{width:62px;}
+#myTable #column6{width:60px;}
+#myTable #column7{width:10px;}
+#myTable thead tr th{
+	background:#678b3f;
+	color:#fff;
+   border-width: 1px;
+   border-spacing: 0px;
+   border-style: solid;
+   border-color: #000;
+}
+#myTable tbody tr.rowEven{background:#eef3df;}
+#myTable tbody tr.rowOdd{background:#d5e5b8;}
+#myTable tbody tr:hover{background-color: #8cb85c;}
+#myTable tbody tr td{
+   border-width: 1px;
+   border-spacing: 0px;
+   border-style: solid;
+   border-color: #000;
+	padding:2px;
+	text-align:center;
+}
+
+#myTable tbody tr td a{display:block;padding:2px;}
+*/
+/*______________________________Inventory Table 
+#invReg{width:700px;margin:1em;border-collapse: collapse;border:10px}
+#invReg thead tr th{
+   background:#678b3f;
+   color:#fff;
+   border-width: 1px;
+   border-spacing: 0px;
+   border-style: solid;
+   border-color: #000;
+   text-align:left;
+   padding:0px 2px 0px 2px;
+   font-family: Arial, Helvetica, sans-serif;
+}
+#invReg tbody tr.rowEven{background:#eef3df;}
+#invReg tbody tr.rowOdd{background:#d5e5b8;}
+#invReg tbody tr:hover{background-color: #8cb85c;}
+#invReg tbody tr td{
+   border-width: 1px;
+   border-spacing: 0px;
+   border-style: solid;
+   border-color: #000;
+   padding:0px 2px 0px 2px;
+   text-align:left;
+   font-size:0.9em;
+   font-family: Arial, Helvetica, sans-serif;
+}
+
+#invReg tbody tr td a{display:block;padding:2px;}
+
+/*______________________________Voucher Table */
+#voucherReg{width:680px;margin:1em;border-collapse: collapse;border:10px}
+#voucherReg #column1{width:10px;}
+#voucherReg #column2{width:100px;}
+#voucherReg #column3{width:200px;}
+#voucherReg #column4{width:60px;}
+#voucherReg #column5{width:60px;}
+#voucherReg #column6{width:60px;}
+#voucherReg #column7{width:60px;}
+#voucherReg thead tr th{
+   background:#678b3f;
+   color:#fff;
+   border-width: 1px;
+   border-spacing: 0px;
+   border-style: solid;
+   border-color: #000;
+   text-align:left;
+   padding:0px 2px 0px 2px;
+   font-family: Arial, Helvetica, sans-serif;
+}
+#voucherReg tbody tr.rowEven{background:#eef3df;}
+#voucherReg tbody tr.rowOdd{background:#d5e5b8;}
+#voucherReg tbody tr:hover{background-color: #8cb85c;}
+#voucherReg tbody tr td{
+   border-width: 1px;
+   border-spacing: 0px;
+   border-style: solid;
+   border-color: #000;
+   padding:0px 2px 0px 2px;
+   text-align:left;
+   font-size:0.9em;
+   font-family: Arial, Helvetica, sans-serif;
+}
+
+#voucherReg tbody tr td a{display:block;padding:2px;}
+
+/*______________________________ Tables */
+#orderReg{width:870px;margin:0em;border-collapse: collapse;border:10px}
+#orderReg thead tr th{
+   background:#2f3134;
+   color:#fff;
+   border-width: 1px;
+   border-spacing: 0px;
+   border-style: solid;
+   border-color: #000;
+   text-align:center;
+   padding:0px 2px 0px 2px;
+   height:35px;
+   font-size: 1.0em;
+   /*min-width: 100px;
+   
+   font-family: Tahoma, Geneva, sans-serif;
+   */
+}
+#orderReg tbody tr.rowEven{background:#4C4E53;}
+#orderReg tbody tr.rowOdd{background:#ffffff;}
+#orderReg tbody tr:hover{background-color: #64bfee;}
+#orderReg tbody tr td{
+   border-width: 1px;
+   border-spacing: 0px;
+   border-style: solid;
+   border-color: #000;
+   padding:0px 2px 0px 2px;
+   text-align:left;
+   font-size:1.0em;
+   font-family: Tahoma, Geneva, sans-serif;
+}
+
+#orderReg input[type="text"]
+{
+	height: 25px;
+}
+
+#orderReg tbody tr td a{/*display:block;padding:2px;*/}
+
+.hidden, #blankRow, #blankRow2, .hiddenControls, .newRow td div{display:none;}

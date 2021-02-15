@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Basics - A Clean Blog & Magazine Theme</title>
+	
+	<!-- Custom font from Google -->
+	<link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>
+	<link href='http://fonts.googleapis.com/css?family=Droid+Sans:regular,italic,bold,bolditalic' rel='stylesheet'>
+	
+	<!-- CSS Files -->
+	<link rel="stylesheet" href="css/reset.css">
+	<link rel="stylesheet" href="css/master.css">
+	
+	<!-- Include jQuery -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+	
+	<!-- Slidedeck files -->
+	<link rel="stylesheet" href="css/slidedeck.basics.skin.css">
+	<script src="js/slidedeck.jquery.lite.js"></script>
+	
+	<!-- Functions -->
+	<script src="js/functions.js"></script>
+	
+	<!-- Let's hide the slider and show the expand button -->
+	<script>
+		$(document).ready(function() {
+			$("div#sliderSection").hide();
+			$("#collapseButton").hide();
+			$("#expandButton").show();
+		});
+	</script>
+</head>
+<body>
+
+	<div id="topHeader" class="cAlign">
+		
+		<!-- Logo -->
+		<a href="index.html" id="logo"><img src="img/basicsLogo.png" alt="Basics - A Clean Wordpress Theme" /></a>
+
+		<!-- Menu -->
+		<ul id="nav">
+			<li><a href="#">Home</a></li>
+			<li>
+				<a href="#">Drop down menu</a>
+				<ul>
+					<li><a href="#">A submenu link</a></li>
+					<li><a href="#">Another submenu link</a></li>
+					<li>
+						<a href="#">Level 3 submenu</a>
+						<ul>
+							<li><a href="#">This even goes</a></li>
+							<li><a href="#">One more</a></li>
+							<li><a href="#">Level down</a></li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li><a href="#">Gallery page</a></li>
+			<li><a href="#">Full width page</a></li>
+			<li><a href="#">Contact</a></li>
+		</ul>
+		
+		<div class="cBoth"><!-- --></div>
+	</div> <!-- end topheader -->
+
+
+	
+	<!-- Slider -->
+	<div id="sliderSection">
+		
+		<div class="cAlign">
+	
+			<div id="slidedeckFrame" class="skin-slidedeck-basics">
+				<dl class="slidedeck">
+				    <dt>Webdesign Tuts+</dt>
+				    <dd>
+				    	<a href="#"><img src="http://lorempixum.com/190/190/abstract/" alt="Abstract" /></a>
+				    	
+				    	<h1>Webdesign Tuts+ is great</h1>
+				    	<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, 							ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+				    	
+				    	<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+				    	<div class="blankSeparator"><!-- --></div>
+				    	
+				    	<p><a href="#" class="linkButton">read more about Webdesign Tuts+&nbsp;&raquo;</a></p>
+				    </dd>
+				   
+				    <dt>Envato is great</dt>
+				    <dd>
+				    	<a href="#"><img src="http://lorempixum.com/190/190/technics/" alt="Technics" /></a>
+				    	
+				    	<h1>New Envato website</h1>
+				    	<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+
+						<p>Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+				    	<div class="blankSeparator"><!-- --></div>
+				    					    	
+				    	<p><a href="#" class="linkButton">read more about the new website&nbsp;&raquo;</a></p>
+				    </dd>
+				   
+				    <dt>No Images</dt>
+				    <dd>
+				    	<h1>Slide with lots of text</h1>
+				    	
+				    	<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+				    	
+				    	<p>Vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+				    	<div class="blankSeparator"><!-- --></div>
+				    	
+				    	<p><a href="#" class="linkButton">read more&nbsp;&raquo;</a></p>
+				    </dd>
+
+				    <dt>Other news</dt>
+				    <dd>
+				    	<h1>Slide with a smaller image</h1>
+				    	
+				    	<a href="#"><img src="http://lorempixum.com/120/120/abstract/" alt="Abstract" /></a>
+
+				    	<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+				    	
+				    	<p>Vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+				    	<div class="blankSeparator"><!-- --></div>
+				    	
+				    	<p><a href="#" class="linkButton">read more&nbsp;&raquo;</a></p>
+				    </dd>
+				</dl>
+				
+				<!-- Fire up the slider -->
+				<script type="text/javascript">
+				    // The most basic implementation using the default options
+				    $('.slidedeck').slidedeck();
+				</script>
+			</div> <!-- end slidedeckFrame -->
+
+		</div>
+		
+	</div> <!-- end sliderSection -->
+	
+	
+	
+	<!-- Category Section -->
+	<div id="categorySection">
+	
+		<div class="cAlign">
+		
+			<!-- Categories -->
+			<ul>
+				<li><a href="#">Design</a></li>
+				<li><a href="#">Print Work</a></li>
+				<li><a href="#">Showcases</a></li>
+				<li><a href="#">SEO</a></li>
+				<li><a href="#">Freebies</a></li>
+			</ul>
+			
+			<!-- Toggle Button -->
+			<img src="img/collapseButton.png" alt="Click here to collapse the panel" class="toggleButton" id="collapseButton" />
+			<img src="img/expandButton.png" alt="Click here to expand the panel" class="toggleButton" id="expandButton" />
+			
+			<div style="clear: both"><!-- --></div>
+		</div>
+		
+	</div> <!-- end categorySection -->
+	
+	
+	
+	
+	<!-- Breadcrumbs -->
+	<div id="breadcrumbsSection">
+	
+		<div class="cAlign cFloat">
+		
+			<p>
+				You are here:
+				<a href="index.html">Home</a>
+				&nbsp;&raquo;&nbsp;
+				<strong>Blog</strong>
+			</p>
+			
+			<!-- Search Bar -->
+			<form action="#" method="post" id="searchForm">
+				<fieldset>
+					<input type="text" id="searchBar" name="searchBar" value="search here..."  onfocus="if(this.value=='search here...')this.value='';" onblur="if(this.value=='')this.value='search here...';"/>
+				</fieldset>
+			</form>
+		
+		</div>
+	
+	</div> <!-- end breacrumbsSection -->
+	
+	
+	
+	<div class="cAlign cFloat">
+	
+		<!-- Blog Post List -->
+		<div id="mainSection">
+			
+			<div id="articleBody">
+					<!-- Meta -->
+					<p class="articleMeta">
+						Posted by
+						<a href="#">admin</a><br>
+						on
+						<a href="#">Dec 12th</a><br>
+						in
+						<a href="#">Design</a><br><br>
+						
+						<a href="blog-single.html#comments">Leave a comment</a>
+					</p>
+					
+					<div class="articleContent">
+						<h2>Blog post title</h2>
+						<img src="http://lorempixum.com/510/130/abstract" alt="Great placeholder image" />
+						
+						<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+						
+						<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.</p>
+						
+						<p class="tags">Tagged: <a href="#">design</a> <a href="#">seo</a></p>
+					</div>
+			</div> <!-- end articleBody -->
+			
+			<div id="articleExtra">
+				
+				<div id="shareSection">
+					
+					<a href="#" id="shareThisPost">
+						<img src="img/shareIcon.png" alt="Share This Post" />
+						<p>Share This Post</p>
+					</a>
+					
+					<ul>
+						<li><a href="#"><img src="img/social/twitter.png" alt="Twitter" /></a></li>
+						<li><a href="#"><img src="img/social/rss.png" alt="RSS" /></a></li>
+						<li><a href="#"><img src="img/social/delicious.png" alt="Delicious" /></a></li>
+						<li><a href="#"><img src="img/social/facebook.png" alt="Facebook" /></a></li>
+						<li><a href="#"><img src="img/social/google.png" alt="Google" /></a></li>
+						<li><a href="#"><img src="img/social/msn.png" alt="MSN" /></a></li>
+						<li><a href="#"><img src="img/social/linkedin.png" alt="LinkedIn" /></a></li>
+					</ul>
+					
+				</div>
+				
+				<div id="authorBio">
+					<img src="img/placeholder/authorAvatar.jpg" alt="Author Bio Avatar" />
+					<h4>Written by <a href="#">Adi Purdila</a></h4>
+					<p>My name is Adi, I’m a web designer from Romania and I love creating simple and clean websites.
+					I’m currently working on landing pages, WordPress themes and massive tutorial series for the Envato network.</p>
+				</div>
+			
+			</div> <!-- end articleExtra -->
+			
+			<div id="articleComments">
+			
+				<a id="comments"></a>
+				
+				<h4 id="commentListHeading">6 Comments for &quot;Blog Post Title&quot;</h4>
+				
+				<ul id="commentList">
+					<li>
+						<div class="commentMeta">
+						
+							<p>May 23rd</p>
+							
+							<img src="img/placeholder/userAvatar.jpg" alt="User avatar" />
+						
+						</div>
+						
+						<div class="commentBody">
+						
+							<h6>Author Name</h6>
+							<p>Some random blog comment! Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi.</p>
+							<a href="#">REPLY</a>
+						
+						</div>
+					</li>
+
+					<li>
+						<div class="commentMeta">
+						
+							<p>May 23rd</p>
+							
+							<img src="img/placeholder/userAvatar.jpg" alt="User avatar" />
+						
+						</div>
+						
+						<div class="commentBody">
+						
+							<a href="#">Author Name</a>
+							<p>Some random blog comment! Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi.</p>
+							<a href="#">Reply</a>
+						
+						</div>
+					</li>
+
+					<li>
+						<div class="commentMeta">
+						
+							<p>May 23rd</p>
+							
+							<img src="img/placeholder/userAvatar.jpg" alt="User avatar" />
+						
+						</div>
+						
+						<div class="commentBody">
+						
+							<a href="#">Author Name</a>
+							<p>Some random blog comment! Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi.</p>
+							<a href="#">REPLY</a>
+						
+						</div>
+
+						<ul>
+							<li>
+								<div class="commentMeta">
+								
+									<p>May 23rd</p>
+									
+									<img src="img/placeholder/userAvatar.jpg" alt="User avatar" />
+								
+								</div>
+								
+								<div class="commentBody">
+								
+									<a href="#">Author Name</a>
+									<p>Some random blog comment! Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi.</p>
+									<a href="#">REPLY</a>
+								
+								</div>
+
+								<ul>
+									<li>
+										<div class="commentMeta">
+										
+											<p>May 23rd</p>
+											
+											<img src="img/placeholder/userAvatar.jpg" alt="User avatar" />
+											
+											<span class="adminComment">ADMIN</span>
+										
+										</div>
+										
+										<div class="commentBody">
+										
+											<a href="#">ADI</a>
+											<p>Some random blog comment! Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi.</p>
+											<a href="#">REPLY</a>
+										
+										</div>
+
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+
+					<li>
+						<div class="commentMeta">
+						
+							<p>May 23rd</p>
+							
+							<img src="img/placeholder/userAvatar.jpg" alt="User avatar" />
+						
+						</div>
+						
+						<div class="commentBody">
+						
+							<a href="#">Author Name</a>
+							<p>Some random blog comment! Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi.</p>
+							<a href="#">Reply</a>
+						
+						</div>
+					</li>
+
+				</ul>
+				
+				<h4>Leave a comment for &quot;Blog post title&quot;</h4>
+				
+				<form action="#" method="post" id="articleCommentForm">
+					<fieldset>
+						<p>
+							<input type="text" id="commentName">
+							<label for="commentName">Your Name <span>(required)</span></label>
+						</p>
+						
+						<p>
+							<input type="text" id="commentEmail">
+							<label for="commentEmail">Your Email Address <span>(required)</span></label>
+						</p>
+
+						<p>
+							<textarea id="commentMessage" cols="10" rows="10"></textarea>
+						</p>
+						
+						<input type="submit" value="Submit Comment&nbsp;&raquo;">
+					</fieldset>
+				</form>
+				
+			</div> <!-- end articleComments -->
+			
+		</div> <!-- end mainSection -->
+		
+		<!-- Sidebar -->
+		<div id="sidebar">
+		
+			<ol>
+				<li>
+					<h4>Archives</h4>
+					<ul class="twoColList">
+						<li><a href="#">January 2011</a></li>
+						<li><a href="#">December 2011</a></li>
+						<li><a href="#">November 2011</a></li>
+						<li><a href="#">October 2011</a></li>
+					</ul>
+				</li>
+
+				<li>
+					<h4>Categories</h4>
+					<ul class="twoColList">
+						<li><a href="#">Design</a></li>
+						<li><a href="#">Freebies</a></li>
+						<li><a href="#">SEO</a></li>
+						<li><a href="#">Showcases</a></li>
+						<li><a href="#">Print Work</a></li>
+						<li><a href="#">Miscellaneous</a></li>
+					</ul>
+				</li>
+
+				<li>
+					<h4>Recent Comments</h4>
+					<ul class="fullWidthList">
+						<li>
+							<p>
+							Roger said:
+							<span>Great article, I’ve added your website to my bookmarks.</span>
+							on <a href="#">Article title</a>
+							</p>
+						</li>
+
+						<li>
+							<p>
+							John May said:
+							<span>This was a great read. Keep up the good work.</span>
+							on <a href="#">Another great article title</a>
+							</p>
+						</li>
+					</ul>
+				</li>
+
+				<li>
+					<h4>Latest Tweets</h4>
+					<ul class="fullWidthList">
+						<li>
+							<p>
+							<span>Great, great tweet!</span>
+							3 min ago via TweetDeck
+							</p>
+						</li>
+
+						<li>
+							<p>
+							<span>Making the mockup for Basics, having fun :D!</span>
+							3 min ago via TweetDeck
+							</p>
+						</li>
+					</ul>
+				</li>
+			</ol>
+		
+		</div> <!-- end sidebar -->
+		
+	</div>
+	
+	
+	
+	<!-- Footer -->
+	<div id="footer">
+		
+		<div class="cAlign cFloat">
+			
+			<!-- 1/4 -->
+			<div class="oneFourth">
+				
+				<h4>Archives</h4>
+				
+				<ul class="fullWidthList">
+					<li><a href="#">January 2011</a></li>
+					<li><a href="#">December 2011</a></li>
+					<li><a href="#">November 2011</a></li>
+					<li><a href="#">October 2011</a></li>
+				</ul>
+
+				<h4>Recent Comments</h4>
+				
+				<ul class="fullWidthList">
+					<li>
+						<p>
+						Roger said:
+						<span>Great article, I’ve added your website to my bookmarks.</span>
+						on <a href="#">Article title</a>
+						</p>
+					</li>
+
+					<li>
+						<p>
+						John May said:
+						<span>This was a great read. Keep up the good work.</span>
+						on <a href="#">Another great article title</a>
+						</p>
+					</li>
+				</ul>
+				
+			</div>
+			
+			<!-- 1/4 -->
+			<div class="oneFourth">
+
+				<h4>Categories</h4>
+				
+				<ul class="fullWidthList">
+					<li><a href="#">Design</a></li>
+					<li><a href="#">Freebies</a></li>
+					<li><a href="#">SEO</a></li>
+					<li><a href="#">Showcases</a></li>
+					<li><a href="#">Print Work</a></li>
+					<li><a href="#">Miscellaneous</a></li>
+				</ul>
+
+				<h4>Meta</h4>
+				
+				<ul class="fullWidthList">
+					<li><a href="#">Login</a></li>
+					<li><a href="#">Comments RSS</a></li>
+					<li><a href="#">Entries RSS</a></li>
+					<li><a href="#">WordPress.org</a></li>
+				</ul>
+			
+			</div>
+			
+			<!-- 1/2 -->
+			<div class="oneHalf">
+				
+				<!-- About author -->
+				<h4>About the author</h4>
+				<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.</p>
+				
+				<div id="socialSection">
+
+					<p>Follow Us:</p>				
+					<ul>
+						<li><a href="#"><img src="img/social/facebook.png" alt="Facebook" /></a></li>
+						<li><a href="#"><img src="img/social/rss.png" alt="RSS" /></a></li>
+						<li><a href="#"><img src="img/social/twitter.png" alt="Twitter" /></a></li>
+					</ul>
+				
+					<p><a href="#">Contact us via contact form  &nbsp;&raquo;</a></p>
+				</div> <!-- end socialSection -->
+			
+				<div class="blankSeparator"><!-- --></div>
+			
+				<!-- Subscribe -->
+				<h4>Subscribe to our newsletter</h4>
+				<p>To subscribe, enter your email address below.</p>
+				
+				<form action="#" method="post" id="subscribeForm">
+					<fieldset>
+						<input type="text" id="email" name="email" value="enter email address"  onfocus="if(this.value=='enter email address')this.value='';" onblur="if(this.value=='')this.value='enter email address';" />
+						<input type="submit" value="Subscribe &nbsp;&raquo;" />
+					</fieldset>
+				</form>
+			</div>
+			
+		</div>
+	
+	</div> <!-- end footer -->
+	
+	
+	
+	<!-- Copyright info -->
+	<div id="copyrightSection">
+		
+		<img src="img/basicsSmallLogo.png" alt="Basics - A Clean Wordpress Theme" />
+		
+		<p>&copy; Copyright 2011 Basics Wordpress Theme. All rights reserved.</p>
+		<p>Proudly powered by <a href="http://www.wordpress.org">WordPress</a>.</p>
+		
+	</div> <!-- end copyrightSection -->
+	
+</body>
+</html>

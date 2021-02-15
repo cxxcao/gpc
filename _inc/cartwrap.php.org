@@ -1,0 +1,142 @@
+   <div id="slidingTopWrap">
+      <div id="slidingTopContent">
+         <div id="basketWrap">
+            <div id="basketTitleWrap">
+               Your Cart <span id="notificationsLoader"></span>
+            </div>
+            <div id="basketItemsWrap">
+               <ul>
+               <li></li>
+               <?php
+                  if(!$_SESSION['order'])
+                  {
+                     $orders = new orders();
+                     //reset admin's allowance if any
+                     //$orders->LoadUserIdAllowance($_SESSION[_USER_ID]);
+                     $orders->LoadUserIdAllowance($orders->getCurrentUserID());
+                  }
+                  else
+                  {
+                     $orders = unserialize($_SESSION["order"]);
+                  }
+
+                  $numlines = count($orders->lineitems);
+                  $carttotal = 0.00;
+                  $belttotal = 0.00;
+
+                  if ($numlines > 0)
+                  {
+                     $arrKeys = array_keys($orders->lineitems);
+                     for($i = 0; $i < $numlines; $i++)
+                     {
+                        $key = $arrKeys[$i];
+                        $li = $orders->lineitems[$key];
+                        $tmpCost = $li->lineCost();
+                        $final_cost = formatNumber($tmpCost);
+                        $name = $li->product->item_number;
+                        $desc = $li->product->description;
+                        $prod_id = $li->product->prod_id;
+                        $qty = $li->qty;
+                        $size = $li->size;
+
+                        $basketText = $basketText . '<li id="productID_' . $prod_id . '_'.$size.'"><a id="productID_' . $prod_id . '_'.$size.'" class="basketitems" href="'._CUR_HOST ._DIR .'products/ajaxcart.php?action=delete&prod_id=' . $prod_id . '" onClick="return false;"><img src="'._CUR_HOST ._DIR .'_img/del.png" id="productID_' . $prod_id . '_'.$size.'"></a> ' . $name . ' | size: '.$size.' (' . $qty . ' items) - $<span class="productPrice" id="' . $key .'_'.$final_cost . '">' . $final_cost . '</span></li>';
+                        //echo "prod: $prod_id<BR>";
+                        if($prod_id != _BELT_PROD_ID)
+                           $carttotal += $tmpCost;
+                        else
+                           $belttotal += $tmpCost;
+                     }
+                     echo $basketText;
+                     //$carttotal = formatNumber($carttotal);
+                  }
+
+                ?>
+               </ul>
+               <input id="cartval" type="hidden" class="carttotal" value="<?php echo formatNumber($carttotal);?>"/>
+               <input id="beltval" type="hidden" class="carttotal" value="<?php echo formatNumber($belttotal);?>"/>
+            </div>
+         </div>
+      </div>
+      <div id="slidingTopFooter">
+         <div id="slidingTopFooterLeft">
+             <a href="no-js.htm" onclick="return false;" id="slidingTopTrigger">Hide Cart</a>
+         </div>
+         <div id="totals">
+            <ul class="ulcart">
+               <?php
+                  //$orders->LoadUserIdAllowance($_SESSION[_USER_ID]);
+                  $orders->LoadUserIdAllowance($orders->getCurrentUserID());
+
+                  //$allowance = $_SESSION[_ALLOWANCE];
+                  $allowance = $orders->getAllowanceFromOrderDate();
+                  $alreadyOrdered = $orders->getOrderedTotal();
+                  $paidAmt = $orders->GetAlreadyPaid($orders->getCurrentUserID(), $orders->order_id);
+                  //$paidAmt = $orders->GetAlreadyPaid($_SESSION[_USER_ID], $orders->order_id);
+                  //echo "p: $paidAmt a: $allowance o: $alreadyOrdered<BR>";
+                  //$remaining = ($allowance + $paidAmt) - $alreadyOrdered;
+//
+//                  if($remaining < 0)
+//                     $remaining = 0;
+                  //$payable = $orders->CalcPayable($carttotal);
+
+                  $cartTotal = $orders->GrandTotal();
+
+                  $remaining = $allowance+$paidAmt;
+                  $remaining = bcsub($remaining, $alreadyOrdered, 2);
+                  $remaining = bcsub($remaining, $cartTotal, 2);
+                 // $remaining -= $cartTotal;
+//echo "action: " . $orders->action . "<BR>";
+//echo "REMAIN: $remaining<BR>";
+// echo "ALL: $allowance REMAINING: $remaining ALREADYORDERED: $alreadyOrdered CARTTOTAL: $cartTotal PAID: $paidAmt<BR>";
+                  $payable = $orders->CalcPayable($total);
+
+                  if($remaining < 0)
+                     $remaining = 0;
+
+                  $availableAllowance = bcadd($allowance,$paidAmt,2);
+                  $availableAllowance = bcsub($availableAllowance, $alreadyOrdered,2);
+
+                  if($availableAllowance < 0) //set to zero so it doesnt display a -ve number
+                     $availableAllowance = 0;
+
+               ?>
+               <li class="carttotal">Available Allowance: $<?php echo formatNumber($availableAllowance);?></li>
+               <li class="carttotal">Cart Total: $<?php echo formatNumber($carttotal);?></li>
+               <?php
+                  if($remaining > 0)
+                  {
+               ?>
+                     <li class="carttotal">Remaining: $<?php echo formatNumber($remaining);?></li>
+               <?php
+
+                  }
+                  else
+                  {
+                     //$payable *= -1.1;//gst
+                     $payable *= -1;
+                     //$payable += $belttotal;
+                     $formattedPayable = "";
+                     if($orders->isAUS == "N")
+                     {
+                        $formattedPayable = "\$" . formatNumber($payable);
+                     }
+                     else
+                     {
+                        $formattedPayable = "\$" . formatNumber($payable);
+                     }
+               ?>
+                      <li class="carttotal">Payable: <?php echo $formattedPayable;?></li>
+               <?php
+                  }
+               ?>
+            </ul>
+            <input type="hidden" name="hiddenallowance" id="hiddenallowance" value="<?php echo $availableAllowance;?>"/>
+            <input type="hidden" name="hiddenalreadyordered" id="hiddenalreadyordered" value="<?php echo 0;?>"/>
+            <input type="hidden" name="hiddenalreadypaid" id="hiddenalreadypaid" value="<?php echo $paidAmt;?>"/>
+         </div>
+         <div id="checkout1">
+         <br/>
+            <a id="checkout" href="<?php echo _CUR_HOST ._DIR . "products/checkout.php"?>">CHECK OUT</a>
+         </div>
+      </div>
+   </div>
